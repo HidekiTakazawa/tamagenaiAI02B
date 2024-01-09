@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>単語カード/单词卡</title>
+  <style>
+    #flashcard {
+      width: 600px;
+      height: 200px;
+      border: 1px solid #000;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 48px;
+    }
+  </style>
+  <!--  スプレッドシートの情報を読み込むために必要 -->
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  
+</head>
+<body>
+  <div class="header">
+    <div class="link">
+      <ui>
+        <li><a href="index.html">index.html スプレッドシート　最初のシートのみ</a></li>
+      </ui>
+      <ui>
+        <li><a href="index2.html">index2.html 2次元配列をプログラム内で持つ</a></li>
+      </ui>
+      
+    </div>
+    <!-- シートセレクトボックス -->
+    <div class="sheetSelect">
+
+      <label for="sheet-select">シート選択：</label><select id="sheet-select" name="sheetSelect"></select>
+    </div>
+  </div>
+  <div id="flashcard">Click to see definition/按下键看单词卡</div>
+  <button onclick="showAnswer()">按键</button>
+
+  <script>
+    // スプレッドシート　単語カード2　gas webアプリ　URL
+    const END_POINT = "https://script.google.com/macros/s/AKfycbxgv8U-k9Iv7-Ehgdam8Xp7AP8z0XOAgoqoLR7vawv7xAOeKs1WpsV0cdk1UxrqWSVnSQ/exec";
+    // スプレッドシート　単語カードを読み込んで配列　flashcardDataにセット
+    let flashcardDatas;  // 全シートのflashdata
+    let flashcardData;   // フラッシュカード新形式
+    let flashcardData2;  // フラッシュカード旧形式
+    let sheetIndex = 0;
+    let currentIndex = 0;
+    flashcardYomikomi();  // スプレッドシート読み込み
+    //
+    const flashcard = document.getElementById('flashcard');
+    const button = document.querySelector('button');
+    const sheetSelector = document.getElementById("sheet-select");
+    const synth = window.speechSynthesis;
+    // 非同期処理　すブレッドシートの単語カード読み込み関数
+    // 読み込みが成功すればflashcardDataにデータを格納する。
+    function flashcardYomikomi() {
+      $.ajax({
+        type: "GET",
+        url: END_POINT,
+        // data: { sheetNo: SHEET_NO }
+
+      }).done((result) => {        // 成功した時の処理
+        console.log("get done:" + result);
+        setSheetNames(JSON.parse(result)[0]);
+        
+        flashcardDatas = JSON.parse(result);
+        flashcardData = JSON.parse(result)[1];
+        flashcardData2 = flashcardGenerate(flashcardData);
+        
+      }).fail((error) => {  // 失敗した時の処理
+        alert('Error:' + JSON.stringify(error));
+
+      }).always((data) => {// 常にやる処理
+        // do something
+        // enableControlElements();
+      });
+    }
+    // シート選択されたときの処理
+    let select = document.querySelector('[name="sheetSelect"]');
+
+    select.onchange = event => {
+      var selIndex = select.selectedIndex;
+      sheetIndex = selIndex;
+      console.log(select.selectedIndex);
+
+      flashcardData = flashcardDatas[selIndex + 1];
+      
+      flashcardData2 = flashcardGenerate(flashcardData);
+      currentIndex = 0;
+      flashcard.textContent = '按下键看单词卡';
+      
+    }
+    // シートのセレクトボックス　作成処理
+    function setSheetNames(sheetNamesArray) {
+      sheetSelector.innerHTML = "";
+      document.createElement('option')
+      sheetNamesArray.forEach((sheetName, index) => {
+        let option = document.createElement('option');
+        option.setAttribute('value', index + 1);
+        option.innerHTML = sheetName;
+        sheetSelector.appendChild(option);
+      });
+    }
+    //  フラッシュカードのフォーマットを旧形式に変換する
+    //  プログラムの変更を少なくするため
+    function flashcardGenerate(flashcardData) {
+      let j = 0;
+      let flashcardData2 = [];
+      for (let i = 0; i < flashcardData.length; i++) {
+        let gyou = [flashcardData[i][2], flashcardData[i][3]];
+        flashcardData2.push(gyou);
+        gyou = [flashcardData[i][0], flashcardData[i][1]];
+        flashcardData2.push(gyou);
+       
+      }
+      return flashcardData2;
+    }
+
+    
+
+    // 答えを表示し、音声を再生する関数
+    function showAnswer() {
+      const currentData = flashcardData2[currentIndex];
+      console.log(`currentdata= ${currentData}`);
+      flashcard.textContent = currentData[1];
+      // termがHTMLの時に中国だから　HTMLの時だけspeakTextを呼び出す。
+      if (currentData[0] === 'ch') {
+
+        speakText(currentData[1]);
+      }
+      currentIndex = (currentIndex + 1) % flashcardData2.length;
+    }
+
+    // テキストを音声に変換して再生する関数
+    function speakText(text) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'zh-CN'; // 中国語の言語コード
+      synth.speak(utterance);
+    }
+
+
+    // 最初のカードを表示
+    flashcard.textContent = '按下键看单词卡';
+  </script>
+</body>
+</html>
