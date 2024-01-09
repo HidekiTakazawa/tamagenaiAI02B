@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>単語カード/单词卡</title>
+  <style>
+    #flashcard {
+      width: 600px;
+      height: 200px;
+      border: 1px solid #000;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 48px;
+    }
+  </style>
+  <!--  スプレッドシートの情報を読み込むために必要 -->
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+</head>
+<body>
+  <div id="flashcard">Click to see definition/按下键看单词卡</div>
+  <button onclick="showAnswer()">按键</button>
+
+  <script>
+    // スプレッドシート　単語カード　gas webアプリ　URL
+    const END_POINT = "https://script.google.com/macros/s/AKfycbwfB_KmxkvNV0sJnXj7GPg85tMcz3ze18KXeCzR1JaqZ4THQNzv7fgd-eNj1dIx8r3c/exec";
+    // スプレッドシート　単語カードを読み込んで配列　flashcardDataにセット
+    let flashcardData;
+    flashcardYomikomi();
+    //
+    const flashcard = document.getElementById('flashcard');
+    const button = document.querySelector('button');
+    const synth = window.speechSynthesis;
+    // 非同期処理　すブレッドシートの単語カード読み込み関数
+    // 読み込みが成功すればflashcardDataにデータを格納する。
+    function flashcardYomikomi() {
+      $.ajax({
+        type: "GET",
+        url: END_POINT,
+        // data: { sheetNo: SHEET_NO }
+
+      }).done((result) => {        // 成功した時の処理
+        console.log("get done:" + result);
+        
+        flashcardData = JSON.parse(result);
+        
+      }).fail((error) => {  // 失敗した時の処理
+        alert('Error:' + JSON.stringify(error));
+
+      }).always((data) => {// 常にやる処理
+        // do something
+        // enableControlElements();
+      });
+    }
+    // フラッシュカードの情報
+    // const flashcardData = [
+    //   { term: 'JavaScript', definition: '日本では' },
+    //   { term: 'HTML', definition: '在日本' },
+    //   { term: 'JavaScript', definition: '「元旦」と呼ばれている' },
+    //   { term: 'HTML', definition: '被叫做元旦' },
+    //   { term: 'JavaScript', definition: 'その日からスタート' },
+    //   { term: 'HTML', definition: '从那天开始' },
+    //   { term: 'JavaScript', definition: '中国では' },
+    //   { term: 'HTML', definition: '在中国' },
+    //   { term: 'JavaScript', definition: 'それはつまり～です' },
+    //   { term: 'HTML', definition: '那就是' },
+    //   { term: 'JavaScript', definition: '何日間の休みになる' },
+    //   { term: 'HTML', definition: '放几天假' },
+    //   { term: 'JavaScript', definition: '大体一週間' },
+    //   { term: 'HTML', definition: '大概一个星期' },
+    //   { term: 'JavaScript', definition: 'どんな風習がある' },
+    //   { term: 'HTML', definition: '有什么习俗' },
+    //   { term: 'JavaScript', definition: '大晦日では' },
+    //   { term: 'HTML', definition: '在除夕夜' },
+    //   { term: 'JavaScript', definition: '新年のあいさつする' },
+    //   { term: 'HTML', definition: '拜年' },
+    //   { term: 'JavaScript', definition: '親戚や友達を訪問する' },
+    //   { term: 'HTML', definition: '走亲访友' },
+    //   { term: 'JavaScript', definition: '非常に賑やか' },
+    //   { term: 'HTML', definition: '非常热闹' },
+    //   { term: 'JavaScript', definition: '試験の問題用紙' },
+    //   { term: 'HTML', definition: '考试卷' },
+    //   { term: 'JavaScript', definition: '顔の汗' },
+    //   { term: 'HTML', definition: '脸上的汗' },
+    //   { term: 'JavaScript', definition: 'ちょっと拭く' },
+    //   { term: 'HTML', definition: '擦擦' },
+    //   { term: 'JavaScript', definition: '期末試験' },
+    //   { term: 'HTML', definition: '期末考试' },
+    //   { term: 'JavaScript', definition: '叱る' },
+    //   { term: 'HTML', definition: '批评' },
+    //   { term: 'JavaScript', definition: '～に叱られる' },
+    //   { term: 'HTML', definition: '被批评' },
+    //   // 他の単語と定義を追加
+    //   { term: 'JavaScript', definition: '我在学习汉语。' },
+    //   { term: 'HTML', definition: '私は中国語を勉強しているところだ。' },
+    // ];
+
+    let currentIndex = 0;
+
+    // 答えを表示し、音声を再生する関数
+    function showAnswer() {
+      const currentData = flashcardData[currentIndex];
+      flashcard.textContent = currentData[1];
+      // termがHTMLの時に中国だから　HTMLの時だけspeakTextを呼び出す。
+      if (currentData[0] === 'ch') {
+
+        speakText(currentData[1]);
+      }
+      currentIndex = (currentIndex + 1) % flashcardData.length;
+    }
+
+    // テキストを音声に変換して再生する関数
+    function speakText(text) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'zh-CN'; // 中国語の言語コード
+      synth.speak(utterance);
+    }
+
+
+    // 最初のカードを表示
+    flashcard.textContent = '按下键看单词卡';
+  </script>
+</body>
+</html>

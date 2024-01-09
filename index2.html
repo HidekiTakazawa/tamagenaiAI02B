@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>単語カード/单词卡</title>
+  <style>
+    #flashcard {
+      width: 600px;
+      height: 200px;
+      border: 1px solid #000;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 48px;
+    }
+  </style>
+  
+</head>
+<body>
+  <div id="flashcard">Click to see definition/按下键看单词卡</div>
+  <button onclick="showAnswer()">按键</button>
+
+  <script>
+    
+    const flashcard = document.getElementById('flashcard');
+    const button = document.querySelector('button');
+    const synth = window.speechSynthesis;
+    
+    // フラッシュカードの情報  2次元配列にする
+    // スプレッドシートの単語カードを読み込んで2次元配列に格納することを予定しているため
+    // flashcard[0][0] = 'jp' flashcardData[0][1] = '日本では'
+    const flashcardData = [
+      ['jp', '日本では'],
+      ['ch', '在日本'],
+      ['jp', '「元旦」と呼ばれている'],
+      ['ch', '被叫做元旦'],
+      ['jp', 'その日からスタート'],
+      ['ch', '从那天开始'],
+      ['jp', '中国では'],
+      ['ch', '在中国'],
+      ['jp', 'それはつまり～です'],
+      ['ch', '那就是'],
+      ['jp', '何日間の休みになる'],
+      ['ch', '放几天假'],
+      ['jp', '大体一週間'],
+      ['ch', '大概一个星期'],
+      ['jp', 'どんな風習がある'],
+      ['ch', '有什么习俗'],
+      ['jp', '大晦日では'],
+      ['ch', '在除夕夜'],
+      ['jp', '新年のあいさつする'],
+      ['ch', '拜年'],
+      ['jp', '親戚や友達を訪問する'],
+      ['ch', '走亲访友'],
+      ['jp', '非常に賑やか'],
+      ['ch', '非常热闹'],
+      ['jp', '試験の問題用紙'],
+      ['ch', '考试卷'],
+      ['jp', '顔の汗'],
+      ['ch', '脸上的汗'],
+      ['jp', 'ちょっと拭く'],
+      ['ch', '擦擦'],
+      ['jp', '期末試験'],
+      ['ch', '期末考试'],
+      ['jp', '叱る'],
+      ['ch', '批评'],
+      ['jp', '～に叱られる'],
+      ['ch', '被批评'],
+      ['jp', '私は中国語を勉強しているところだ。'],
+      ['ch', '我在学习汉语。'],
+  ]
+
+    let currentIndex = 0;
+
+    // 答えを表示し、音声を再生する関数
+    function showAnswer() {
+      const currentData = flashcardData[currentIndex];
+      flashcard.textContent = currentData[1];
+      // termがHTMLの時に中国だから　HTMLの時だけspeakTextを呼び出す。
+      if (currentData[0] === 'ch') {
+
+        speakText(currentData[1]);
+      }
+      currentIndex = (currentIndex + 1) % flashcardData.length;
+    }
+
+    // テキストを音声に変換して再生する関数
+    function speakText(text) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'zh-CN'; // 中国語の言語コード
+      synth.speak(utterance);
+    }
+
+
+    // 最初のカードを表示
+    flashcard.textContent = '按下键看单词卡';
+  </script>
+</body>
+</html>
