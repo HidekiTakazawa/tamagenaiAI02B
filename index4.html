@@ -1,26 +1,62 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>単語カード/单词卡</title>
   <style>
-    #flashcard {
-      width: 380px;
-      height: 200px;
-      border: 1px solid #000;
-      text-align: center;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 28px;
+    .card {
+      position: relative;
+      perspective: 500px;
+    }
+
+    .fuda {
+      position: absolute;
+      display: inline-block;
+      transition: 2s;
+      backface-visibility: hidden;
+      border-radius: 15px;
+    }
+
+    .csize {
+      width: 300px;
+      height: 50px;
+    }
+
+    #omote {
+      transform: rotateY(180deg);
+      background: white;
+      border: 2px solid black;
+      padding: 0.6em;
+    }
+
+    #ura {
+      transform: rotateY(0deg);
+      background: pink;
+      border: 10px double black;
+      /* background-image: linear-gradient(45deg, #ffffff00 50%, #ffffff80 50%);
+      background-size: 20px 20px; */
+    }
+
+    #tg01:checked~#omote {
+      transform: rotateY(0deg);
+    }
+
+    #tg01:checked~#ura {
+      transform: rotateY(-180deg);
+    }
+
+    #btn {
+      margin-top: 50px;
     }
   </style>
   <!--  スプレッドシートの情報を読み込むために必要 -->
   <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-  
+
 </head>
+
 <body>
   <div class="header">
     <div class="link">
@@ -31,9 +67,9 @@
         <li><a href="index2.html">index2.html 2次元配列をプログラム内で持つ</a></li>
       </ui>
       <ui>
-        <li><a href="index4.html">index4.html スプレッドシート　複数シート対応 カード回転</a></li>
+        <li><a href="index3.html">index3.html スプレッドシート　複数シート対応</a></li>
       </ui>
-      
+
     </div>
     <!-- シートセレクトボックス -->
     <div class="sheetSelect">
@@ -41,8 +77,16 @@
       <label for="sheet-select">シート選択：</label><select id="sheet-select" name="sheetSelect"></select>
     </div>
   </div>
-  <div id="flashcard">Click to see definition/按下键看单词卡</div>
-  <button onclick="showAnswer()">按键</button>
+  <div class="card csize">
+    <input id="tg01" style="display: none;" type="checkbox" />
+    <label id="omote" class="fuda csize" for="tg01">めくると出てくる文章</label>
+    <label id="ura" class="fuda csize" for="tg01">按下键看单词卡</label>
+  </div>
+  <!-- <div id="flashcard">Click to see definition/按下键看单词卡</div> -->
+  <div id="btn">
+    <button onclick="showAnswer()">按键</button>
+
+  </div>
 
   <script>
     // スプレッドシート　単語カード2　gas webアプリ　URL
@@ -50,15 +94,34 @@
     // スプレッドシート　単語カードを読み込んで配列　flashcardDataにセット
     let flashcardDatas;  // 全シートのflashdata
     let flashcardData;   // フラッシュカード新形式
-    let flashcardData2;  // フラッシュカード旧形式
+
     let sheetIndex = 0;
     let currentIndex = 0;
     flashcardYomikomi();  // スプレッドシート読み込み
     //
-    const flashcard = document.getElementById('flashcard');
+    let swOmoteUra = false;
+    // const flashcard = document.getElementById('flashcard');
     const button = document.querySelector('button');
     const sheetSelector = document.getElementById("sheet-select");
+    const omote = document.getElementById("omote");
+    const ura = document.getElementById("ura");
+    const tg01 = document.getElementById("tg01");
     const synth = window.speechSynthesis;
+    tg01.addEventListener('change', () => {
+      if (swOmoteUra) {
+        swOmoteUra = false;
+
+
+      } else {
+        swOmoteUra = true;
+        setTimeout(() => {
+          console.log("Delayed for 1 second.");
+          speakText(omote.textContent);
+        }, "1000");
+
+      }
+
+    });
     // 非同期処理　すブレッドシートの単語カード読み込み関数
     // 読み込みが成功すればflashcardDataにデータを格納する。
     function flashcardYomikomi() {
@@ -70,11 +133,11 @@
       }).done((result) => {        // 成功した時の処理
         console.log("get done:" + result);
         setSheetNames(JSON.parse(result)[0]);
-        
+
         flashcardDatas = JSON.parse(result);
         flashcardData = JSON.parse(result)[1];
-        flashcardData2 = flashcardGenerate(flashcardData);
-        
+        // flashcardData2 = flashcardGenerate(flashcardData);
+
       }).fail((error) => {  // 失敗した時の処理
         alert('Error:' + JSON.stringify(error));
 
@@ -92,11 +155,12 @@
       console.log(select.selectedIndex);
 
       flashcardData = flashcardDatas[selIndex + 1];
-      
-      flashcardData2 = flashcardGenerate(flashcardData);
+
+      // flashcardData2 = flashcardGenerate(flashcardData);
       currentIndex = 0;
-      flashcard.textContent = '按下键看单词卡';
-      
+      tg01.checked = false
+      ura.textContent = '按下键看单词卡';
+
     }
     // シートのセレクトボックス　作成処理
     function setSheetNames(sheetNamesArray) {
@@ -111,32 +175,35 @@
     }
     //  フラッシュカードのフォーマットを旧形式に変換する
     //  プログラムの変更を少なくするため
-    function flashcardGenerate(flashcardData) {
-      let j = 0;
-      let flashcardData2 = [];
-      for (let i = 0; i < flashcardData.length; i++) {
-        let gyou = [flashcardData[i][2], flashcardData[i][3]];
-        flashcardData2.push(gyou);
-        gyou = [flashcardData[i][0], flashcardData[i][1]];
-        flashcardData2.push(gyou);
-       
-      }
-      return flashcardData2;
-    }
+    // function flashcardGenerate(flashcardData) {
+    //   let j = 0;
+    //   let flashcardData2 = [];
+    //   for (let i = 0; i < flashcardData.length; i++) {
+    //     let gyou = [flashcardData[i][2], flashcardData[i][3]];
+    //     flashcardData2.push(gyou);
+    //     gyou = [flashcardData[i][0], flashcardData[i][1]];
+    //     flashcardData2.push(gyou);
 
-    
+    //   }
+    //   return flashcardData2;
+    // }
+
+
 
     // 答えを表示し、音声を再生する関数
     function showAnswer() {
-      const currentData = flashcardData2[currentIndex];
+      swOmoteUra = false;
+      tg01.checked = false
+      const currentData = flashcardData[currentIndex];
       console.log(`currentdata= ${currentData}`);
-      flashcard.textContent = currentData[1];
+      omote.textContent = currentData[1];
+      ura.textContent = currentData[3];
       // termがHTMLの時に中国だから　HTMLの時だけspeakTextを呼び出す。
-      if (currentData[0] === 'ch') {
+      // if (currentData[0] === 'ch') {
 
-        speakText(currentData[1]);
-      }
-      currentIndex = (currentIndex + 1) % flashcardData2.length;
+      //   speakText(currentData[1]);
+      // }
+      currentIndex = (currentIndex + 1) % flashcardData.length;
     }
 
     // テキストを音声に変換して再生する関数
@@ -148,7 +215,8 @@
 
 
     // 最初のカードを表示
-    flashcard.textContent = '按下键看单词卡';
+    // flashcard.textContent = '按下键看单词卡';
   </script>
 </body>
+
 </html>
