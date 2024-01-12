@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>カード回転　テスト</title>
+  <style>
+    .card {
+      position: relative;
+      perspective: 500px;
+    }
+
+    .fuda {
+      position: absolute;
+      display: inline-block;
+      transition: 2s;
+      backface-visibility: hidden;
+      border-radius: 15px;
+    }
+
+    .csize {
+      width: 150px;
+      height: 200px;
+    }
+
+    #omote {
+      transform: rotateY(180deg);
+      background: white;
+      border: 2px solid black;
+      padding: 0.6em;
+    }
+
+    #ura {
+      transform: rotateY(0deg);
+      background: pink;
+      border: 10px double black;
+      background-image: linear-gradient(45deg, #ffffff00 50%, #ffffff80 50%);
+      background-size: 20px 20px;
+    }
+
+    #tg01:checked~#omote {
+      transform: rotateY(0deg);
+    }
+
+    #tg01:checked~#ura {
+      transform: rotateY(-180deg);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card csize">
+    <input id="tg01" style="display: none;" type="checkbox" />
+    <label id="omote" class="fuda csize" for="tg01">めくると出てくる文章</label>
+    <label id="ura" class="fuda csize" for="tg01">裏の文章</label>
+    </div>
+
+</body>
+
+</html>
