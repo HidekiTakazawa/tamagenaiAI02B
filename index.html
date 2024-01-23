@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE Chinese>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
@@ -48,6 +48,9 @@
       <ui>
         <li><a href="index8.html">index8.html 単語カード/单词卡 バックボタンの不具合訂正</a></li>
       </ui>
+      <ui>
+        <li><a href="index9.html">index9.html 単語カード/单词卡 ピンイン、表示場所の変更</a></li>
+      </ui>
       
     </div>
   </div>
@@ -93,7 +96,7 @@
     function showAnswer() {
       const currentData = flashcardData[currentIndex];
       flashcard.textContent = currentData[1];
-      // termがHTMLの時に中国だから　HTMLの時だけspeakTextを呼び出す。
+      // termがChineseの時に中国だから　Chineseの時だけspeakTextを呼び出す。
       if (currentData[0] === 'ch') {
 
         speakText(currentData[1]);

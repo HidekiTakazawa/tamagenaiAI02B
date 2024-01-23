@@ -1,0 +1,222 @@
+<!DOCTYPE Chinese>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <title>単語カード/单词卡</title>
+  <style>
+     #flashcard {
+      width: 1000px;
+      height: 300px;
+      border: 1px solid #000;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 48px;
+    }
+
+    /* ボタンのスタイルを変更してサイズを大きくする */
+    button {
+      font-size: 40px;
+      /* フォントサイズを大きくする */
+      padding: 20px 30px;
+      /* パディングを増やしてボタンのサイズを調整する */
+      margin: 10px; /* マージンを追加してボタンを配置しやすくする */
+    }
+body {
+      background-color: #f4c4ee;
+    }
+
+    h1 {
+      color: blue;
+    }
+
+    #result {
+      font-size: 24px;
+      margin-top: 20px;
+    }
+    .header  {
+      
+      display: flex;
+    }
+    .linkurl {
+      margin-left: auto;
+    }
+   
+    #flash {
+      display: inline-block;
+      width: 100px;
+      height: 40px;
+      cursor: pointer;
+      background-color: skyblue;
+      text-decoration: none;
+      text-align: center;
+      line-height: 50px;
+      border-radius: 6px
+      
+    }
+    #ikeda {
+      display: inline-block;
+      width: 100px;
+      height: 40px;
+      cursor: pointer;
+      background-color: pink;
+      text-decoration: none;
+      text-align: center;
+      line-height: 50px;
+      border-radius: 6px
+      
+    }
+  </style>
+</head>
+
+<body>
+  <div class="header">
+    <div class="logo">
+      <h3>中国語　フラッシュカード</h3>
+    
+    </div>
+    <div class="linkurl">
+      <a id="flash" href="https://script.google.com/macros/s/AKfycbz4oJsJ-w-NmZI_qlEsi_jMeoWUbBfcKWinqAECVhQxJe49tWGij9KNLZjJ7UMSMc8/exec" target="_blank">会話、短文</a>
+      <a id="ikeda" href="index6.Chinese" target="_blank">使用手引書</a>
+  
+    </div>
+  </div>
+  <div id="flashcard">Click to see definition/按下键看(第5课)单词卡</div>
+  <button onclick="showPreviousCard()">上一个</button>
+  <button onclick="showAnswer()">下一个</button>
+  <button onclick="checkAnswer(true)">答案和我想的一样</button>
+  <button onclick="checkAnswer(false)">答案和我想的不一样</button>
+
+  <div id="result">正解: 0 回 不正解: 0 回</div>
+
+  <script>
+    /* 省略... */
+    let termSave;  //  フラッシュカードをクリックしたときに表示内容が中国語かどうかを判定するため
+const flashcard = document.getElementById('flashcard');
+    const resultDiv = document.getElementById('result');
+    const synth = window.speechSynthesis;
+
+    // フラッシュカードの情報
+    const flashcardData = [
+      // 省略...
+      { term: 'Japanese', definition: '1.だれもが（どの家でも）よく知っている/成語'}, { term: 'Chinese', definition: '家喻户晓/jiā yù hù xiǎo' },
+{ term: 'Japanese', definition: '2.世間、民衆の間/名詞' }, { term: 'Chinese', definition: '民间/mínjiān' },
+{ term: 'Japanese', definition: '3.伝説/名詞' }, { term: 'Chinese', definition: '传说/chuánshuō' },
+{ term: 'Japanese', definition: '4.紀元前/連語' }, { term: 'Chinese', definition: '公元前/gōngyuán qián' },
+{ term: 'Japanese', definition: '5.秦の始皇帝/名詞' }, { term: 'Chinese', definition: '秦始皇/Qínshǐhuáng' },
+{ term: 'Japanese', definition: '6.周り、周辺/名詞' }, { term: 'Chinese', definition: '周围/zhōuwéi' },
+{ term: 'Japanese', definition: '7.城壁/名詞' }, { term: 'Chinese', definition: '城墙/chéngqiáng' },
+{ term: 'Japanese', definition: '8.つなぐ、つながる/動詞' }, { term: 'Chinese', definition: '连接/liánjiē ' },
+{ term: 'Japanese', definition: '9.建造する、修築する/動詞' }, { term: 'Chinese', definition: '修建/xiūjiàn' },
+{ term: 'Japanese', definition: '10.（人を）募集する/動詞' }, { term: 'Chinese', definition: '招募/zhāomù' },
+{ term: 'Japanese', definition: '11.政府に徴集されて臨時の工事をする民間労働者/名詞' }, { term: 'Chinese', definition: '民工/míngōng' },
+{ term: 'Japanese', definition: '12.孟姜女、秦の始皇帝時代の女性の名/名詞' }, { term: 'Chinese', definition: '孟姜女/Mèng-Jiāngnǚ' },
+{ term: 'Japanese', definition: '13.～したばかり/副詞' }, { term: 'Chinese', definition: '刚刚/gānggāng' },
+{ term: 'Japanese', definition: '14.すでに、もう/副詞' }, { term: 'Chinese', definition: '就/jiù' },
+{ term: 'Japanese', definition: '15.捕まえる/動詞' }, { term: 'Chinese', definition: '抓/zhuā' },
+{ term: 'Japanese', definition: '16.待つ/動詞' }, { term: 'Chinese', definition: '等/děng' },
+{ term: 'Japanese', definition: '17.しかし/接続詞' }, { term: 'Chinese', definition: '可是/kěshì' },
+{ term: 'Japanese', definition: '18.音信、便り/名詞' }, { term: 'Chinese', definition: '消息/xiāoxi' },
+{ term: 'Japanese', definition: '19.そこで/接続詞' }, { term: 'Chinese', definition: '于是/yúshì' },
+{ term: 'Japanese', definition: '20.どんなに（～しても）/連語' }, { term: 'Chinese', definition: '怎么 + V (+也)/zěnme + V（+ yě）' },
+{ term: 'Japanese', definition: '21.尋ねる、問い合わせる/動詞' }, { term: 'Chinese', definition: '打听/dǎtīng' },
+{ term: 'Japanese', definition: '22.やっと、ようやく/副詞' }, { term: 'Chinese', definition: '才/cái ' },
+{ term: 'Japanese', definition: '23.分かる、知る/動詞' }, { term: 'Chinese', definition: '知道/zhīdào' },
+{ term: 'Japanese', definition: '24.疲れる/形容詞' }, { term: 'Chinese', definition: '累/lèi' },
+{ term: 'Japanese', definition: '25.下/名詞' }, { term: 'Chinese', definition: '底下/dǐxia' },
+{ term: 'Japanese', definition: '26.心が痛むほど悲しい/形容詞' }, { term: 'Chinese', definition: '悲痛/bēitòng' },
+{ term: 'Japanese', definition: '27.すごく～だ/連語' }, { term: 'Chinese', definition: '极了/jíle' },
+{ term: 'Japanese', definition: '28.泣く/動詞' }, { term: 'Chinese', definition: '哭/kū' },
+{ term: 'Japanese', definition: '29.動作の過程が長いことを表す/連語' }, { term: 'Chinese', definition: 'V 啊 +V 啊/V a + V a' },
+{ term: 'Japanese', definition: '30.発見する、気づく/動詞' }, { term: 'Chinese', definition: '发现/fāxiàn' },
+{ term: 'Japanese', definition: '31.400キロ、（ものの）長いことを表す/連語' }, { term: 'Chinese', definition: '八百里/bābǎi lǐ' },
+{ term: 'Japanese', definition: '32.倒れる、崩れる/動詞' }, { term: 'Chinese', definition: '倒塌/dàotā' },
+{ term: 'Japanese', definition: '33.見つかる、見つける/動詞' }, { term: 'Chinese', definition: '找到/zhǎodào' },
+{ term: 'Japanese', definition: '34.死体/名詞' }, { term: 'Chinese', definition: '尸体/shītǐ' },
+{ term: 'Japanese', definition: '35.埋葬する/動詞' }, { term: 'Chinese', definition: '安葬/ānzàng' },
+{ term: 'Japanese', definition: '36.山海関、万里の長城の起点/名詞' }, { term: 'Chinese', definition: '山海关/Shānhǎiguān' },
+{ term: 'Japanese', definition: '37.海に身を投げる/動詞' }, { term: 'Chinese', definition: '投海/tóuhǎi' },
+{ term: 'Japanese', definition: '38.自殺する/動詞' }, { term: 'Chinese', definition: '自尽/zìjìn' },
+{ term: 'Japanese', definition: '39.その後、やがて/接続詞' }, { term: 'Chinese', definition: '后来/hòulái' },
+{ term: 'Japanese', definition: '40.廟、祖先の霊を祭るところ/名詞' }, { term: 'Chinese', definition: '庙/miào' },
+{ term: 'Japanese', definition: '41.祭祀をとり行う、まつる/動詞' }, { term: 'Chinese', definition: '祭祀/jìsì' },
+
+      // 他の単語と定義を追加
+      { term: 'Japanese', definition: '私は中国語を勉強しているところだ。' },
+      { term: 'Chinese', definition: '我在学习汉语。👍赞' },
+      { term: 'Japanese', definition: '全部の内容を勉強しました。' },
+      { term: 'Chinese', definition: '我学完了全部！👍赞' },
+    ];
+
+    let currentIndex = -1;  // showAnswerがcurrentIndexに１加算後表示するように変更
+    let correctCount = 0;
+    let incorrectCount = 0;
+    // 前のカードを表示する関数
+    function showPreviousCard() {
+      currentIndex = currentIndex - 1;
+      if (currentIndex < 0) {
+        currentIndex = 0;
+      }
+      const currentData = flashcardData[currentIndex];
+      flashcard.textContent = currentData.definition;
+      termSave = currentData.term;
+      // termがChineseの時に中国だから　Chineseの時だけspeakTextを呼び出す。
+      if (currentData.term === 'Chinese') {
+        speakText(currentData.definition);
+      }
+    }
+
+    // 答えを表示し、音声を再生する関数
+    function showAnswer() {
+      currentIndex = (currentIndex + 1) % flashcardData.length; // currentIndex加算後処理に変更
+      const currentData = flashcardData[currentIndex];
+      flashcard.textContent = currentData.definition;
+      termSave = currentData.term;
+      // termがChineseの時に中国だから　Chineseの時だけspeakTextを呼び出す。
+      if (currentData.term === 'Chinese') {
+        speakText(currentData.definition);
+      }
+    }
+
+    // テキストを音声に変換して再生する関数
+    function speakText(text) {
+      let textChinese = text.split('/');
+      console.log(textChinese);
+      const utterance = new SpeechSynthesisUtterance(textChinese[0]);
+      utterance.lang = 'zh-CN'; // 中国語の言語コード
+      synth.speak(utterance);
+    }
+
+    // 正解不正解の判断
+    function checkAnswer(isCorrect) {
+      // ここに正解不正解の処理を追加する
+      if (isCorrect) {
+        correctCount++;
+      } else {
+        incorrectCount++;
+      }
+
+      // 結果を表示する
+      displayResult();
+    }
+
+    // 結果を表示する関数
+    function displayResult() {
+      resultDiv.textContent = `正解: ${correctCount} 回 不正解: ${incorrectCount} 回`;
+    }
+
+    // 最初のカードを表示
+    flashcard.textContent = '按下键看(第5课)单词卡';
+
+    // フラッシュカードがクリックされた時の処理
+    flashcard.addEventListener('click', () => {
+      if (termSave === 'Chinese') {
+        speakText(flashcard.textContent);
+      }
+    });
+  </script>
+</body>
+
+</html>
